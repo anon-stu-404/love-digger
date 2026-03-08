@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>💕 Love Digger · Rizwan 💘 Anha</title>
+  <title>💕 Love Digger · Rizwan vs Anha</title>
   <style>
     /* ---------- RESET & GLOBAL ---------- */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Quicksand', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Quicksand', 'Segoe UI', system-ui, sans-serif;
     }
-
     body {
       min-height: 100vh;
       background: radial-gradient(circle at top left, #ffb6d1, #f9a8d4);
@@ -21,8 +20,6 @@
       justify-content: center;
       padding: 10px;
     }
-
-    /* Main game card */
     #game {
       width: 100%;
       max-width: 440px;
@@ -30,20 +27,16 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-radius: 56px 56px 40px 40px;
-      box-shadow: 0 30px 40px rgba(200, 80, 120, 0.4), 0 10px 20px rgba(0,0,0,0.1);
-      border: 3px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 30px 40px rgba(200, 80, 120, 0.4);
+      border: 3px solid rgba(255,255,255,0.7);
       padding: 24px 18px 30px;
-      transition: transform 0.3s ease;
     }
-
-    /* ---------- TYPOGRAPHY & ICONS ---------- */
     h1 {
       font-size: 2.4rem;
       font-weight: 700;
       color: #a13e5f;
       text-align: center;
       text-shadow: 4px 4px 0 #ffd9e8;
-      letter-spacing: -0.5px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -58,72 +51,26 @@
       0%,100% { transform: translateY(0); }
       50% { transform: translateY(-8px); }
     }
+    .screen { display: none; }
+    .screen.active { display: block; }
 
-    /* ---------- ROOM SCREEN ---------- */
-    .screen {
-      display: none;
-      opacity: 0;
-      transition: opacity 0.4s ease, transform 0.3s ease;
-    }
-    .screen.active {
-      display: block;
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    .room-panel {
-      background: rgba(255, 220, 235, 0.6);
-      border-radius: 60px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      border: 2px solid white;
-    }
-    .room-panel input {
-      width: 100%;
-      padding: 16px 20px;
-      border: none;
-      border-radius: 50px;
-      background: white;
-      font-size: 1.1rem;
-      box-shadow: inset 0 4px 8px #fec5dd;
-      outline: 2px solid transparent;
-      transition: 0.2s;
+    /* ---------- WAITING SCREEN ---------- */
+    #waitingScreen {
       text-align: center;
-      font-weight: 600;
+      padding: 40px 0;
     }
-    .room-panel input:focus {
-      outline-color: #ff98bb;
+    .waiting-message {
+      font-size: 1.8rem;
+      color: #791e45;
+      margin-bottom: 20px;
     }
-    .room-panel button {
-      background: #ff8eb5;
-      border: none;
-      border-radius: 50px;
-      padding: 16px;
-      color: white;
-      font-weight: bold;
-      font-size: 1.2rem;
-      box-shadow: 0 8px 0 #b34e71, 0 6px 15px rgba(180,70,120,0.3);
-      cursor: pointer;
-      transition: 0.08s linear;
-      border: 2px solid white;
+    .spinner {
+      font-size: 3rem;
+      animation: spin 2s infinite;
     }
-    .room-panel button:active {
-      transform: translateY(8px);
-      box-shadow: 0 2px 0 #b34e71;
-    }
-
-    .name-input {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .name-input input {
-      flex: 1;
-      padding: 14px;
-      border-radius: 40px;
-      border: 2px solid #ffb8d2;
+    @keyframes spin {
+      0% { transform: rotate(0); }
+      100% { transform: rotate(360deg); }
     }
 
     /* ---------- GAME HEADER ---------- */
@@ -131,7 +78,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(255, 255, 255, 0.5);
+      background: rgba(255,255,255,0.5);
       padding: 12px 18px;
       border-radius: 50px;
       border: 2px solid white;
@@ -144,7 +91,6 @@
       border-radius: 40px;
       font-weight: 700;
       font-size: 1.3rem;
-      box-shadow: inset 0 -4px 0 #261a20;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -158,9 +104,7 @@
     }
     .timer-bar-fill {
       height: 100%;
-      width: 100%;
       background: #ffd966;
-      border-radius: 20px;
       transition: width 1s linear;
     }
     .score-box {
@@ -172,7 +116,7 @@
       box-shadow: 0 5px 0 #ffb0c8;
     }
 
-    /* ---------- TURN INDICATOR + HOT METER ---------- */
+    /* ---------- TURN AREA + HOT METER ---------- */
     .turn-area {
       background: #ffdae9;
       border-radius: 40px;
@@ -196,13 +140,12 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      box-shadow: inset 0 2px 6px #feadc6;
     }
     .hot-indicator {
       width: 30px;
       height: 30px;
       border-radius: 50%;
-      background: #b0d0ff;
+      background: #6bc5ff;
       transition: background 0.2s, transform 0.2s;
     }
     .hot-indicator.hot { background: #ff4d4d; transform: scale(1.2); }
@@ -215,7 +158,7 @@
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 8px;
-      background: rgba(255, 220, 235, 0.5);
+      background: rgba(255,220,235,0.5);
       padding: 18px 10px;
       border-radius: 44px;
       border: 3px solid white;
@@ -225,7 +168,7 @@
       aspect-ratio: 1/1;
       background: #ffefd5;
       border-radius: 20px;
-      box-shadow: 0 8px 0 #c08caa, 0 6px 12px rgba(140, 70, 100, 0.3);
+      box-shadow: 0 8px 0 #c08caa;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -239,31 +182,13 @@
       transform: translateY(6px);
       box-shadow: 0 2px 0 #c08caa;
     }
-    .cell.heart {
-      background: #ffb3c6;
-      color: #ff3b6f;
-      animation: pop 0.3s;
-    }
-    .cell.dig {
-      background: #cdb6c0;
-      box-shadow: 0 4px 0 #8e6b78;
-      transform: translateY(4px);
-      font-size: 1.8rem;
-    }
-    .cell.dig.found {
-      background: #ff9ebb;
-      animation: heartFound 0.5s;
-    }
-    @keyframes pop {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-    }
-    @keyframes heartFound {
-      0% { transform: scale(1); }
-      30% { transform: scale(1.4); background: #ffc0cb; }
-    }
+    .cell.heart { background: #ffb3c6; color: #ff3b6f; animation: pop 0.3s; }
+    .cell.dig { background: #cdb6c0; box-shadow: 0 4px 0 #8e6b78; transform: translateY(4px); font-size: 1.8rem; }
+    .cell.dig.found { background: #ff9ebb; animation: heartFound 0.5s; }
+    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } }
+    @keyframes heartFound { 0% { transform: scale(1); } 30% { transform: scale(1.4); background: #ffc0cb; } }
 
-    /* ---------- LOVES LEFT & CHAT ---------- */
+    /* ---------- ACTION BAR ---------- */
     .action-bar {
       display: flex;
       align-items: center;
@@ -293,12 +218,9 @@
       border: 2px solid white;
       transition: 0.08s;
     }
-    .chat-icon:active {
-      transform: translateY(7px);
-      box-shadow: none;
-    }
+    .chat-icon:active { transform: translateY(7px); box-shadow: none; }
     .chat-panel {
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255,255,255,0.95);
       backdrop-filter: blur(4px);
       border-radius: 40px 40px 30px 30px;
       padding: 18px 14px;
@@ -306,11 +228,8 @@
       display: none;
       flex-direction: column;
       margin-top: 12px;
-      transition: all 0.3s;
     }
-    .chat-panel.show {
-      display: flex;
-    }
+    .chat-panel.show { display: flex; }
     .chat-messages {
       max-height: 160px;
       overflow-y: auto;
@@ -318,7 +237,6 @@
       border-radius: 30px;
       padding: 14px;
       margin-bottom: 12px;
-      font-size: 0.95rem;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -332,20 +250,9 @@
       word-break: break-word;
       border: 1px solid white;
     }
-    .chat-message.own {
-      background: #ffd5e5;
-      align-self: flex-end;
-    }
-    .chat-message .name {
-      font-weight: 700;
-      color: #b84774;
-      font-size: 0.8rem;
-    }
-    .chat-message .time {
-      font-size: 0.7rem;
-      color: #a77;
-      margin-left: 8px;
-    }
+    .chat-message.own { background: #ffd5e5; align-self: flex-end; }
+    .chat-message .name { font-weight: 700; color: #b84774; font-size: 0.8rem; }
+    .chat-message .time { font-size: 0.7rem; color: #a77; margin-left: 8px; }
     .chat-input-area {
       display: flex;
       gap: 8px;
@@ -369,10 +276,7 @@
       box-shadow: 0 5px 0 #b34e71;
       cursor: pointer;
     }
-    .chat-input-area button:active {
-      transform: translateY(5px);
-      box-shadow: none;
-    }
+    .chat-input-area button:active { transform: translateY(5px); box-shadow: none; }
 
     /* ---------- READY BUTTON ---------- */
     .ready-btn {
@@ -386,33 +290,20 @@
       border: 2px solid white;
       cursor: pointer;
       font-size: 1.1rem;
-      transition: 0.08s;
+      width: 100%;
+      margin-top: 10px;
     }
-    .ready-btn:active {
-      transform: translateY(6px);
-      box-shadow: none;
-    }
+    .ready-btn:active { transform: translateY(6px); box-shadow: none; }
+    .ready-btn:disabled { opacity: 0.5; pointer-events: none; }
 
     /* ---------- RESULT SCREEN ---------- */
     .result-box {
       text-align: center;
       padding: 30px 10px;
     }
-    .trophy {
-      font-size: 6rem;
-      animation: spin 2s infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0); }
-      25% { transform: rotate(10deg); }
-      75% { transform: rotate(-10deg); }
-    }
-    .winner-name {
-      font-size: 2.5rem;
-      font-weight: 800;
-      color: #c6477c;
-      margin: 20px 0;
-    }
+    .trophy { font-size: 6rem; animation: spin 2s infinite; }
+    @keyframes spin { 0% { transform: rotate(0); } 25% { transform: rotate(10deg); } 75% { transform: rotate(-10deg); } }
+    .winner-name { font-size: 2.5rem; font-weight: 800; color: #c6477c; margin: 20px 0; }
     .play-again {
       background: #ff98bb;
       border: none;
@@ -425,32 +316,20 @@
       border: 3px solid white;
       cursor: pointer;
     }
-    .play-again:active {
-      transform: translateY(10px);
-      box-shadow: none;
-    }
+    .play-again:active { transform: translateY(10px); box-shadow: none; }
   </style>
 </head>
 <body>
   <div id="game">
-    <h1>
-      <span>💖</span> LOVE DIGGER <span>💖</span>
-    </h1>
+    <h1><span>💖</span> LOVE DIGGER <span>💖</span></h1>
 
-    <!-- Room Screen -->
-    <div id="roomScreen" class="screen active">
-      <div class="room-panel">
-        <input type="text" id="roomCodeInput" placeholder="enter room code" />
-        <div class="name-input">
-          <input type="text" id="playerNameInput" placeholder="your name" value="Rizwan" />
-          <button id="joinRoomBtn">Join</button>
-        </div>
-        <button id="createRoomBtn">✨ Create new room</button>
-      </div>
-      <div id="roomInfo" style="margin-top:20px; text-align:center; font-weight:600;"></div>
+    <!-- Waiting Screen (shown until both players join) -->
+    <div id="waitingScreen" class="screen active">
+      <div class="waiting-message">waiting for other player...</div>
+      <div class="spinner">💞</div>
     </div>
 
-    <!-- Game Screen -->
+    <!-- Game Screen (placement/digging) -->
     <div id="gameScreen" class="screen">
       <div class="game-header">
         <div class="timer-box">
@@ -484,10 +363,8 @@
         </div>
       </div>
 
-      <!-- Ready button (only during placement) -->
-      <div style="display:flex; justify-content:center; margin:10px 0;">
-        <button id="readyBtn" class="ready-btn">✅ I'm ready</button>
-      </div>
+      <!-- Ready Button (placement only) -->
+      <button id="readyBtn" class="ready-btn">✅ I'm ready</button>
     </div>
 
     <!-- Result Screen -->
@@ -505,15 +382,20 @@
     (function() {
       const socket = io();
 
+      // Get URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const player = urlParams.get('player'); // 'rizwan' or 'anha'
+      const room = urlParams.get('room');     // e.g. 'love'
+
+      if (!player || !room) {
+        document.body.innerHTML = '<h2>Missing player or room parameter. Use ?player=rizwan&room=love</h2>';
+        return;
+      }
+
       // DOM elements
-      const roomScreen = document.getElementById('roomScreen');
+      const waitingScreen = document.getElementById('waitingScreen');
       const gameScreen = document.getElementById('gameScreen');
       const resultScreen = document.getElementById('resultScreen');
-      const roomCodeInput = document.getElementById('roomCodeInput');
-      const playerNameInput = document.getElementById('playerNameInput');
-      const joinBtn = document.getElementById('joinRoomBtn');
-      const createBtn = document.getElementById('createRoomBtn');
-      const roomInfo = document.getElementById('roomInfo');
       const gridEl = document.getElementById('grid');
       const timerDisplay = document.getElementById('timerDisplay');
       const timerBarFill = document.getElementById('timerBarFill');
@@ -532,22 +414,15 @@
       const playAgainBtn = document.getElementById('playAgainBtn');
 
       // Game state
-      let currentRoom = null;
-      let myId = null;
-      let myName = 'Rizwan'; // default
-      let players = [];
-      let playerNames = {};
-      let currentPhase = 'placement'; // 'placement', 'digging', 'result'
+      let currentPhase = 'waiting';
       let myTurn = false;
       let lovesToPlace = 10;
-      let myLoves = []; // indices where i placed hearts (for placement)
+      let myLoves = []; // indices where i placed hearts
       let boardState = Array(50).fill(null); // null, 'heart', 'empty', 'found'
-      let scores = {};
+      let scores = { rizwan: 0, anha: 0 };
 
-      // Helper to get player name by id
-      function getName(id) {
-        return playerNames[id] || (id === myId ? myName : 'Opponent');
-      }
+      // Send join event
+      socket.emit('joinGame', { player, room });
 
       // Render 5x10 grid
       function renderGrid() {
@@ -586,7 +461,7 @@
         const index = e.currentTarget.dataset.index;
         if (currentPhase === 'placement') {
           if (!myTurn) return;
-          if (lovesToPlace <= 0 && !myLoves.includes(index)) return; // can't add more than 10
+          if (lovesToPlace <= 0 && !myLoves.includes(index)) return;
           if (myLoves.includes(index)) {
             // remove
             myLoves = myLoves.filter(i => i !== index);
@@ -604,7 +479,7 @@
           if (!myTurn) return;
           const row = Math.floor(index / 5);
           const col = index % 5;
-          socket.emit('dig', { roomCode: currentRoom, row, col });
+          socket.emit('dig', { room, row, col });
         }
       }
 
@@ -615,8 +490,8 @@
 
       sendChat.addEventListener('click', () => {
         const msg = chatInput.value.trim();
-        if (msg && currentRoom) {
-          socket.emit('chat', { roomCode: currentRoom, message: msg });
+        if (msg) {
+          socket.emit('chat', { room, message: msg });
           chatInput.value = '';
         }
       });
@@ -630,10 +505,9 @@
         if (currentPhase === 'placement' && myTurn) {
           if (myLoves.length === 10) {
             const loves = myLoves.map(idx => [Math.floor(idx/5), idx%5]);
-            socket.emit('placeLoves', { roomCode: currentRoom, loves });
-            myTurn = false;
-            turnIndicator.innerText = `⏳ waiting for ${getName(players.find(id => id !== myId))}`;
-            readyBtn.style.display = 'none';
+            socket.emit('placeLoves', { room, loves });
+            readyBtn.disabled = true;
+            readyBtn.innerText = '✅ Ready!';
           } else {
             alert(`You need to place exactly 10 hearts! (${myLoves.length} placed)`);
           }
@@ -641,72 +515,46 @@
       });
 
       // Socket events
-      socket.on('connect', () => {
-        myId = socket.id;
-      });
-
-      socket.on('roomCreated', (code) => {
-        currentRoom = code;
-        myName = playerNameInput.value.trim() || 'Rizwan';
-        socket.emit('setName', { roomCode: code, name: myName });
-        roomInfo.innerText = `✨ Room code: ${code} (share with Anha)`;
-      });
-
-      socket.on('roomJoined', (code) => {
-        currentRoom = code;
-        myName = playerNameInput.value.trim() || 'Anha';
-        socket.emit('setName', { roomCode: code, name: myName });
-        roomScreen.classList.remove('active');
-        gameScreen.classList.add('active');
-        renderGrid();
-      });
-
-      socket.on('gameStart', ({ players: p, names }) => {
-        players = p;
-        playerNames = names;
-        myName = playerNames[myId] || myName;
-        roomScreen.classList.remove('active');
-        gameScreen.classList.add('active');
-        renderGrid();
-        // Ensure ready button visible during placement
-        readyBtn.style.display = 'block';
-        lovesToPlace = 10;
-        myLoves = [];
-        boardState.fill(null);
-        updateGridAppearance();
-        lovesLeftEl.textContent = '❤️ 10 left';
-        currentPhase = 'placement';
-        myTurn = (players[0] === myId); // first player starts placement
-        turnIndicator.innerText = myTurn ? '✨ your turn to place' : `✨ ${getName(players[0])} is placing`;
+      socket.on('playerJoined', ({ players, currentPhase: phase, turn, scores: newScores }) => {
+        if (players.length === 2) {
+          waitingScreen.classList.remove('active');
+          gameScreen.classList.add('active');
+          renderGrid();
+          currentPhase = phase || 'placement';
+          myTurn = (turn === player);
+          if (currentPhase === 'placement') {
+            turnIndicator.innerText = myTurn ? '✨ your turn to place' : `✨ ${turn}'s turn`;
+            lovesLeftEl.textContent = '❤️ 10 left';
+            readyBtn.disabled = false;
+            readyBtn.style.display = 'block';
+          }
+          if (newScores) scores = newScores;
+          updateScore();
+        }
       });
 
       socket.on('phaseChange', ({ phase, turn, scores: newScores }) => {
         currentPhase = phase;
         if (phase === 'digging') {
-          phase = '⛏️ digging';
-          readyBtn.style.display = 'none';
           boardState.fill(null);
           updateGridAppearance();
-          if (turn) {
-            myTurn = (turn === myId);
-            turnIndicator.innerText = myTurn ? '⛏️ your turn to dig' : `⛏️ ${getName(turn)}'s turn`;
-          }
+          myTurn = (turn === player);
+          turnIndicator.innerText = myTurn ? '⛏️ your turn to dig' : `⛏️ ${turn}'s turn`;
           if (newScores) {
             scores = newScores;
             updateScore();
           }
+          readyBtn.style.display = 'none';
         } else if (phase === 'result') {
           gameScreen.classList.remove('active');
           resultScreen.classList.add('active');
-          // Show winner
-          let myScore = scores[myId] || 0;
-          let opponentId = players.find(id => id !== myId);
-          let opponentScore = scores[opponentId] || 0;
-          if (myScore > opponentScore) winnerMessage.innerText = `You win, ${myName}! 💕`;
-          else if (myScore < opponentScore) winnerMessage.innerText = `${getName(opponentId)} wins! 💔`;
+          const myScore = scores[player] || 0;
+          const opponentScore = scores[player === 'rizwan' ? 'anha' : 'rizwan'] || 0;
+          if (myScore > opponentScore) winnerMessage.innerText = `You win, ${player}! 💕`;
+          else if (myScore < opponentScore) winnerMessage.innerText = `${player === 'rizwan' ? 'Anha' : 'Rizwan'} wins! 💔`;
           else winnerMessage.innerText = `It's a tie! 🎀`;
 
-          // Confetti (simple)
+          // confetti
           for (let i=0; i<10; i++) {
             setTimeout(() => {
               let conf = document.createElement('div');
@@ -724,19 +572,15 @@
         }
       });
 
-      socket.on('turnChange', (turnPlayerId) => {
-        myTurn = (turnPlayerId === myId);
-        const name = getName(turnPlayerId);
-        turnIndicator.innerText = myTurn ? '⛏️ your turn to dig' : `⛏️ ${name}'s turn`;
+      socket.on('turnChange', (turnPlayer) => {
+        myTurn = (turnPlayer === player);
+        turnIndicator.innerText = myTurn ? '⛏️ your turn to dig' : `⛏️ ${turnPlayer}'s turn`;
       });
 
-      socket.on('digResult', ({ player, row, col, found, hotness, digsLeft, scores: newScores }) => {
+      socket.on('digResult', ({ player: digger, row, col, found, hotness, digsLeft, scores: newScores }) => {
         const index = row * 5 + col;
-        if (found) {
-          boardState[index] = 'found';
-        } else {
-          boardState[index] = 'empty';
-        }
+        if (found) boardState[index] = 'found';
+        else boardState[index] = 'empty';
         scores = newScores;
         updateGridAppearance();
         updateScore();
@@ -751,10 +595,6 @@
         hotLight.className = `hot-indicator ${hotClass}`;
       });
 
-      socket.on('digIgnored', (msg) => {
-        // Optional: show toast
-      });
-
       socket.on('timer', (seconds) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
@@ -763,54 +603,30 @@
         timerBarFill.style.width = `${percent}%`;
       });
 
-      socket.on('chat', ({ sender, name, message, time }) => {
+      socket.on('chat', ({ player: chatPlayer, message, time }) => {
         const msgDiv = document.createElement('div');
-        msgDiv.className = 'chat-message' + (sender === myId ? ' own' : '');
-        msgDiv.innerHTML = `<span class="name">${name}</span> <span class="time">${time}</span><br>${message}`;
+        msgDiv.className = 'chat-message' + (chatPlayer === player ? ' own' : '');
+        msgDiv.innerHTML = `<span class="name">${chatPlayer}</span> <span class="time">${time}</span><br>${message}`;
         chatMessages.appendChild(msgDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
       });
 
       function updateScore() {
-        const myScore = scores[myId] || 0;
-        scoreDisplay.innerText = `❤️ ${myScore}`;
+        scoreDisplay.innerText = `❤️ ${scores[player] || 0}`;
       }
-
-      // Create room
-      createBtn.addEventListener('click', () => {
-        socket.emit('createRoom');
-      });
-
-      // Join room
-      joinBtn.addEventListener('click', () => {
-        const code = roomCodeInput.value.trim().toUpperCase();
-        const name = playerNameInput.value.trim();
-        if (code) {
-          socket.emit('joinRoom', { roomCode: code, name });
-        }
-      });
 
       // Play again
       playAgainBtn.addEventListener('click', () => {
         resultScreen.classList.remove('active');
-        roomScreen.classList.add('active');
-        currentRoom = null;
-        boardState.fill(null);
-        updateGridAppearance();
+        waitingScreen.classList.add('active');
+        // Reload to restart
+        window.location.reload();
       });
 
       // CSS for confetti
       const style = document.createElement('style');
-      style.innerHTML = `
-        @keyframes fall {
-          0% { transform: translateY(0) rotate(0); opacity:1; }
-          100% { transform: translateY(100vh) rotate(360deg); opacity:0; }
-        }
-      `;
+      style.innerHTML = `@keyframes fall { 0% { transform: translateY(0) rotate(0); opacity:1; } 100% { transform: translateY(100vh) rotate(360deg); opacity:0; } }`;
       document.head.appendChild(style);
-
-      // Initial render
-      renderGrid();
     })();
   </script>
 </body>
