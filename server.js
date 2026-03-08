@@ -6,12 +6,12 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Serve the main page
+// Serve main page
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-// In‑memory game rooms keyed by room name
+// Game rooms
 const rooms = {};
 
 io.on('connection', (socket) => {
@@ -22,17 +22,16 @@ io.on('connection', (socket) => {
     if (!player || !room) return;
 
     socket.join(room);
-    socket.data.player = player;   // 'rizwan' or 'anha'
+    socket.data.player = player;
     socket.data.room = room;
 
-    // Create room if not exists
     if (!rooms[room]) {
       rooms[room] = {
-        players: {},          // { socketId: playerName }
-        placements: {},       // { playerName: [[row,col], ...] }
-        dugCells: {},         // { playerName: Set(cellKey) }
+        players: {},          // socketId: playerName
+        placements: {},       // playerName: [[row,col], ...]
+        dugCells: {},         // playerName: Set(cellKey)
         currentPhase: 'placement',
-        turn: null,           // playerName whose turn it is
+        turn: null,
         digsLeft: 20,
         scores: { rizwan: 0, anha: 0 },
         timer: 120,
@@ -44,31 +43,24 @@ io.on('connection', (socket) => {
     const game = rooms[room];
     game.players[socket.id] = player;
 
-    // Initialize data structures for this player
-    if (!game.placements[player]) game.placements[player] = [];
-    if (!game.dugCells[player]) game.dugCells[player] = new Set();
-
-    // Notify everyone in the room
-    io.to(room).emit('playerJoined', {
-      players: Object.values(game.players),
+    // Send current game state to the new player
+    socket.emit('gameState', {
       currentPhase: game.currentPhase,
       turn: game.turn,
       scores: game.scores,
+      ready: game.ready,
     });
 
-    // If both players are in, start placement phase
-    if (Object.keys(game.players).length === 2) {
-      game.currentPhase = 'placement';
-      game.turn = 'rizwan'; // Rizwan starts placing
-      io.to(room).emit('phaseChange', {
-        phase: 'placement',
-        turn: game.turn,
-        players: Object.values(game.players),
-      });
+    // Notify everyone in the room about the updated player list
+    io.to(room).emit('playerList', Object.values(game.players));
+
+    // If both players are now in, start placement phase (already in placement)
+    if (Object.keys(game.players).length === 2 && game.currentPhase === 'placement') {
+      io.to(room).emit('placementStart', { players: Object.values(game.players) });
     }
   });
 
-  // Player places loves
+  // Player places loves (and becomes ready)
   socket.on('placeLoves', ({ room, loves }) => {
     const game = rooms[room];
     if (!game || game.currentPhase !== 'placement') return;
@@ -77,7 +69,10 @@ io.on('connection', (socket) => {
     game.placements[player] = loves;
     game.ready[player] = true;
 
-    // Check if both are ready
+    // Tell everyone that this player is now ready
+    io.to(room).emit('playerReady', { player });
+
+    // If both are ready, move to digging phase
     if (game.ready.rizwan && game.ready.anha) {
       game.currentPhase = 'digging';
       game.turn = 'rizwan'; // Rizwan starts digging
@@ -104,7 +99,6 @@ io.on('connection', (socket) => {
     const opponent = player === 'rizwan' ? 'anha' : 'rizwan';
     const cellKey = `${row},${col}`;
 
-    // Prevent re‑digging
     if (game.dugCells[opponent].has(cellKey)) {
       socket.emit('digIgnored', 'Already dug here!');
       return;
@@ -118,10 +112,10 @@ io.on('connection', (socket) => {
     game.digsLeft--;
     if (found) {
       game.scores[player] = (game.scores[player] || 0) + 1;
-      opponentLoves.splice(foundIndex, 1); // remove that love
+      opponentLoves.splice(foundIndex, 1); // remove found love
     }
 
-    // Calculate hotness
+    // Hotness calculation
     let hotness = 'cold';
     if (opponentLoves.length > 0) {
       const distances = opponentLoves.map(([r, c]) => Math.abs(r - row) + Math.abs(c - col));
@@ -134,7 +128,6 @@ io.on('connection', (socket) => {
       hotness = 'none';
     }
 
-    // Broadcast dig result
     io.to(room).emit('digResult', {
       player,
       row, col,
@@ -153,7 +146,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Chat message
+  // Chat
   socket.on('chat', ({ room, message }) => {
     const game = rooms[room];
     if (!game) return;
