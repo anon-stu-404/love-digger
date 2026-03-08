@@ -6,111 +6,122 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// ✅ FIX: Serve index.html from the root directory
+// Serve the main page
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-// Optional: if you have a public folder with assets (CSS, JS, images), uncomment the next line
-// app.use(express.static('public'));
-
-// In‑memory game rooms
+// In‑memory game rooms keyed by room name
 const rooms = {};
 
 io.on('connection', (socket) => {
   console.log('User connected', socket.id);
 
-  socket.on('createRoom', () => {
-    const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    rooms[roomCode] = {
-      players: [socket.id],
-      playerNames: { [socket.id]: '' },
-      placements: {},
-      dugCells: {},
-      currentPhase: 'placement',
-      turnIndex: 0,
-      digsLeft: 20,
-      scores: {},
-      timer: 120,
-      interval: null,
-    };
-    socket.join(roomCode);
-    socket.emit('roomCreated', roomCode);
-  });
+  // Player joins a room based on URL params
+  socket.on('joinGame', ({ player, room }) => {
+    if (!player || !room) return;
 
-  socket.on('joinRoom', ({ roomCode, name }) => {
-    const room = rooms[roomCode];
-    if (!room) return socket.emit('error', 'Room not found');
-    if (room.players.length >= 2) return socket.emit('error', 'Room full');
+    socket.join(room);
+    socket.data.player = player;   // 'rizwan' or 'anha'
+    socket.data.room = room;
 
-    room.players.push(socket.id);
-    room.playerNames[socket.id] = name || 'Player 2';
-    socket.join(roomCode);
-    socket.emit('roomJoined', roomCode);
+    // Create room if not exists
+    if (!rooms[room]) {
+      rooms[room] = {
+        players: {},          // { socketId: playerName }
+        placements: {},       // { playerName: [[row,col], ...] }
+        dugCells: {},         // { playerName: Set(cellKey) }
+        currentPhase: 'placement',
+        turn: null,           // playerName whose turn it is
+        digsLeft: 20,
+        scores: { rizwan: 0, anha: 0 },
+        timer: 120,
+        interval: null,
+        ready: { rizwan: false, anha: false },
+      };
+    }
 
-    if (room.players.length === 2) {
-      const [p1, p2] = room.players;
-      if (!room.playerNames[p1]) room.playerNames[p1] = 'Rizwan';
-      if (!room.playerNames[p2]) room.playerNames[p2] = 'Anha';
-      io.to(roomCode).emit('gameStart', {
-        players: room.players,
-        names: room.playerNames,
+    const game = rooms[room];
+    game.players[socket.id] = player;
+
+    // Initialize data structures for this player
+    if (!game.placements[player]) game.placements[player] = [];
+    if (!game.dugCells[player]) game.dugCells[player] = new Set();
+
+    // Notify everyone in the room
+    io.to(room).emit('playerJoined', {
+      players: Object.values(game.players),
+      currentPhase: game.currentPhase,
+      turn: game.turn,
+      scores: game.scores,
+    });
+
+    // If both players are in, start placement phase
+    if (Object.keys(game.players).length === 2) {
+      game.currentPhase = 'placement';
+      game.turn = 'rizwan'; // Rizwan starts placing
+      io.to(room).emit('phaseChange', {
+        phase: 'placement',
+        turn: game.turn,
+        players: Object.values(game.players),
       });
     }
   });
 
-  socket.on('setName', ({ roomCode, name }) => {
-    const room = rooms[roomCode];
-    if (room) {
-      room.playerNames[socket.id] = name;
-    }
-  });
+  // Player places loves
+  socket.on('placeLoves', ({ room, loves }) => {
+    const game = rooms[room];
+    if (!game || game.currentPhase !== 'placement') return;
 
-  socket.on('placeLoves', ({ roomCode, loves }) => {
-    const room = rooms[roomCode];
-    if (!room) return;
-    room.placements[socket.id] = loves;
+    const player = socket.data.player;
+    game.placements[player] = loves;
+    game.ready[player] = true;
 
-    if (Object.keys(room.placements).length === 2) {
-      room.currentPhase = 'digging';
-      room.turnIndex = 0;
-      room.digsLeft = 20;
-      room.scores = { [room.players[0]]: 0, [room.players[1]]: 0 };
-      room.dugCells = { [room.players[0]]: new Set(), [room.players[1]]: new Set() };
-      startTimer(roomCode, room);
-      io.to(roomCode).emit('phaseChange', {
+    // Check if both are ready
+    if (game.ready.rizwan && game.ready.anha) {
+      game.currentPhase = 'digging';
+      game.turn = 'rizwan'; // Rizwan starts digging
+      game.digsLeft = 20;
+      game.scores = { rizwan: 0, anha: 0 };
+      game.dugCells = { rizwan: new Set(), anha: new Set() };
+      startTimer(room, game);
+      io.to(room).emit('phaseChange', {
         phase: 'digging',
-        turn: room.players[0],
-        scores: room.scores,
+        turn: game.turn,
+        scores: game.scores,
       });
     }
   });
 
-  socket.on('dig', ({ roomCode, row, col }) => {
-    const room = rooms[roomCode];
-    if (!room || room.currentPhase !== 'digging') return;
-    if (socket.id !== room.players[room.turnIndex]) return;
-    if (room.digsLeft <= 0) return;
+  // Player digs
+  socket.on('dig', ({ room, row, col }) => {
+    const game = rooms[room];
+    if (!game || game.currentPhase !== 'digging') return;
+    if (socket.data.player !== game.turn) return;
+    if (game.digsLeft <= 0) return;
 
-    const opponentId = room.players.find(id => id !== socket.id);
+    const player = socket.data.player;
+    const opponent = player === 'rizwan' ? 'anha' : 'rizwan';
     const cellKey = `${row},${col}`;
 
-    if (room.dugCells[opponentId].has(cellKey)) {
+    // Prevent re‑digging
+    if (game.dugCells[opponent].has(cellKey)) {
       socket.emit('digIgnored', 'Already dug here!');
       return;
     }
-    room.dugCells[opponentId].add(cellKey);
+    game.dugCells[opponent].add(cellKey);
 
-    const opponentLoves = room.placements[opponentId] || [];
+    const opponentLoves = game.placements[opponent] || [];
     const foundIndex = opponentLoves.findIndex(([r, c]) => r === row && c === col);
     const found = foundIndex !== -1;
 
-    room.digsLeft--;
+    game.digsLeft--;
     if (found) {
-      room.scores[socket.id] = (room.scores[socket.id] || 0) + 1;
-      opponentLoves.splice(foundIndex, 1);
+      game.scores[player] = (game.scores[player] || 0) + 1;
+      opponentLoves.splice(foundIndex, 1); // remove that love
     }
 
+    // Calculate hotness
     let hotness = 'cold';
     if (opponentLoves.length > 0) {
       const distances = opponentLoves.map(([r, c]) => Math.abs(r - row) + Math.abs(c - col));
@@ -123,67 +134,73 @@ io.on('connection', (socket) => {
       hotness = 'none';
     }
 
-    io.to(roomCode).emit('digResult', {
-      player: socket.id,
+    // Broadcast dig result
+    io.to(room).emit('digResult', {
+      player,
       row, col,
       found,
       hotness,
-      digsLeft: room.digsLeft,
-      scores: room.scores,
+      digsLeft: game.digsLeft,
+      scores: game.scores,
     });
 
-    room.turnIndex = room.turnIndex === 0 ? 1 : 0;
-    io.to(roomCode).emit('turnChange', room.players[room.turnIndex]);
+    // Switch turn
+    game.turn = opponent;
+    io.to(room).emit('turnChange', game.turn);
 
-    if (room.digsLeft <= 0) {
-      endDiggingPhase(roomCode, room);
+    if (game.digsLeft <= 0) {
+      endDiggingPhase(room, game);
     }
   });
 
-  socket.on('chat', ({ roomCode, message }) => {
-    const room = rooms[roomCode];
-    if (!room) return;
-    const name = room.playerNames[socket.id] || 'Someone';
-    io.to(roomCode).emit('chat', {
-      sender: socket.id,
-      name,
+  // Chat message
+  socket.on('chat', ({ room, message }) => {
+    const game = rooms[room];
+    if (!game) return;
+    const player = socket.data.player;
+    io.to(room).emit('chat', {
+      player,
       message,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     });
   });
 
+  // Disconnect
   socket.on('disconnect', () => {
-    for (const roomCode in rooms) {
-      const room = rooms[roomCode];
-      const index = room.players.indexOf(socket.id);
-      if (index !== -1) {
-        io.to(roomCode).emit('playerLeft');
-        delete rooms[roomCode];
+    for (const room in rooms) {
+      const game = rooms[room];
+      if (game.players[socket.id]) {
+        delete game.players[socket.id];
+        io.to(room).emit('playerLeft', { players: Object.values(game.players) });
+        if (Object.keys(game.players).length === 0) {
+          clearInterval(game.interval);
+          delete rooms[room];
+        }
         break;
       }
     }
   });
 });
 
-function startTimer(roomCode, room) {
-  if (room.interval) clearInterval(room.interval);
-  room.timer = 120;
-  room.interval = setInterval(() => {
-    room.timer--;
-    io.to(roomCode).emit('timer', room.timer);
-    if (room.timer <= 0) {
-      endDiggingPhase(roomCode, room);
+function startTimer(room, game) {
+  if (game.interval) clearInterval(game.interval);
+  game.timer = 120;
+  game.interval = setInterval(() => {
+    game.timer--;
+    io.to(room).emit('timer', game.timer);
+    if (game.timer <= 0) {
+      endDiggingPhase(room, game);
     }
   }, 1000);
 }
 
-function endDiggingPhase(roomCode, room) {
-  clearInterval(room.interval);
-  room.currentPhase = 'result';
-  io.to(roomCode).emit('phaseChange', { phase: 'result', scores: room.scores });
+function endDiggingPhase(room, game) {
+  clearInterval(game.interval);
+  game.currentPhase = 'result';
+  io.to(room).emit('phaseChange', { phase: 'result', scores: game.scores });
 }
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Love Digger server running on port ${PORT}`);
+  console.log(`Love Digger running on port ${PORT}`);
 });
