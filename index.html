@@ -30,6 +30,7 @@
       box-shadow: 0 30px 40px rgba(200, 80, 120, 0.4);
       border: 3px solid rgba(255,255,255,0.7);
       padding: 24px 18px 30px;
+      position: relative;
     }
     h1 {
       font-size: 2.4rem;
@@ -51,10 +52,12 @@
       0%,100% { transform: translateY(0); }
       50% { transform: translateY(-8px); }
     }
+
+    /* Screens */
     .screen { display: none; }
     .screen.active { display: block; }
 
-    /* ---------- WAITING SCREEN ---------- */
+    /* Waiting Screen */
     #waitingScreen {
       text-align: center;
       padding: 40px 0;
@@ -73,7 +76,7 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* ---------- GAME HEADER ---------- */
+    /* Game Header */
     .game-header {
       display: flex;
       align-items: center;
@@ -116,7 +119,7 @@
       box-shadow: 0 5px 0 #ffb0c8;
     }
 
-    /* ---------- TURN AREA + HOT METER ---------- */
+    /* Turn Area + Hot Meter */
     .turn-area {
       background: #ffdae9;
       border-radius: 40px;
@@ -153,7 +156,7 @@
     .hot-indicator.cold { background: #6bc5ff; }
     .hot-indicator.none { background: #c0c0c0; }
 
-    /* ---------- GRID ---------- */
+    /* Grid */
     .grid-container {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -182,13 +185,31 @@
       transform: translateY(6px);
       box-shadow: 0 2px 0 #c08caa;
     }
-    .cell.heart { background: #ffb3c6; color: #ff3b6f; animation: pop 0.3s; }
-    .cell.dig { background: #cdb6c0; box-shadow: 0 4px 0 #8e6b78; transform: translateY(4px); font-size: 1.8rem; }
-    .cell.dig.found { background: #ff9ebb; animation: heartFound 0.5s; }
-    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } }
-    @keyframes heartFound { 0% { transform: scale(1); } 30% { transform: scale(1.4); background: #ffc0cb; } }
+    .cell.heart {
+      background: #ffb3c6;
+      color: #ff3b6f;
+      animation: pop 0.3s;
+    }
+    .cell.dig {
+      background: #cdb6c0;
+      box-shadow: 0 4px 0 #8e6b78;
+      transform: translateY(4px);
+      font-size: 1.8rem;
+    }
+    .cell.dig.found {
+      background: #ff9ebb;
+      animation: heartFound 0.5s;
+    }
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    @keyframes heartFound {
+      0% { transform: scale(1); }
+      30% { transform: scale(1.4); background: #ffc0cb; }
+    }
 
-    /* ---------- ACTION BAR ---------- */
+    /* Action Bar */
     .action-bar {
       display: flex;
       align-items: center;
@@ -218,7 +239,10 @@
       border: 2px solid white;
       transition: 0.08s;
     }
-    .chat-icon:active { transform: translateY(7px); box-shadow: none; }
+    .chat-icon:active {
+      transform: translateY(7px);
+      box-shadow: none;
+    }
     .chat-panel {
       background: rgba(255,255,255,0.95);
       backdrop-filter: blur(4px);
@@ -229,7 +253,9 @@
       flex-direction: column;
       margin-top: 12px;
     }
-    .chat-panel.show { display: flex; }
+    .chat-panel.show {
+      display: flex;
+    }
     .chat-messages {
       max-height: 160px;
       overflow-y: auto;
@@ -250,9 +276,20 @@
       word-break: break-word;
       border: 1px solid white;
     }
-    .chat-message.own { background: #ffd5e5; align-self: flex-end; }
-    .chat-message .name { font-weight: 700; color: #b84774; font-size: 0.8rem; }
-    .chat-message .time { font-size: 0.7rem; color: #a77; margin-left: 8px; }
+    .chat-message.own {
+      background: #ffd5e5;
+      align-self: flex-end;
+    }
+    .chat-message .name {
+      font-weight: 700;
+      color: #b84774;
+      font-size: 0.8rem;
+    }
+    .chat-message .time {
+      font-size: 0.7rem;
+      color: #a77;
+      margin-left: 8px;
+    }
     .chat-input-area {
       display: flex;
       gap: 8px;
@@ -276,9 +313,12 @@
       box-shadow: 0 5px 0 #b34e71;
       cursor: pointer;
     }
-    .chat-input-area button:active { transform: translateY(5px); box-shadow: none; }
+    .chat-input-area button:active {
+      transform: translateY(5px);
+      box-shadow: none;
+    }
 
-    /* ---------- READY BUTTON ---------- */
+    /* Ready Button */
     .ready-btn {
       background: #b0e0b0;
       border: none;
@@ -292,18 +332,61 @@
       font-size: 1.1rem;
       width: 100%;
       margin-top: 10px;
+      transition: 0.08s;
     }
-    .ready-btn:active { transform: translateY(6px); box-shadow: none; }
-    .ready-btn:disabled { opacity: 0.5; pointer-events: none; }
+    .ready-btn:active {
+      transform: translateY(6px);
+      box-shadow: none;
+    }
+    .ready-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 6px 0 #5f9e5f;
+    }
 
-    /* ---------- RESULT SCREEN ---------- */
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #791e45;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      border: 2px solid white;
+      z-index: 1000;
+      display: none;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translate(-50%, 20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    /* Result Screen */
     .result-box {
       text-align: center;
       padding: 30px 10px;
     }
-    .trophy { font-size: 6rem; animation: spin 2s infinite; }
-    @keyframes spin { 0% { transform: rotate(0); } 25% { transform: rotate(10deg); } 75% { transform: rotate(-10deg); } }
-    .winner-name { font-size: 2.5rem; font-weight: 800; color: #c6477c; margin: 20px 0; }
+    .trophy {
+      font-size: 6rem;
+      animation: spin 2s infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0); }
+      25% { transform: rotate(10deg); }
+      75% { transform: rotate(-10deg); }
+    }
+    .winner-name {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #c6477c;
+      margin: 20px 0;
+    }
     .play-again {
       background: #ff98bb;
       border: none;
@@ -316,20 +399,26 @@
       border: 3px solid white;
       cursor: pointer;
     }
-    .play-again:active { transform: translateY(10px); box-shadow: none; }
+    .play-again:active {
+      transform: translateY(10px);
+      box-shadow: none;
+    }
   </style>
 </head>
 <body>
   <div id="game">
     <h1><span>💖</span> LOVE DIGGER <span>💖</span></h1>
 
-    <!-- Waiting Screen (shown until both players join) -->
+    <!-- Toast container -->
+    <div id="toast"></div>
+
+    <!-- Waiting Screen -->
     <div id="waitingScreen" class="screen active">
       <div class="waiting-message">waiting for other player...</div>
       <div class="spinner">💞</div>
     </div>
 
-    <!-- Game Screen (placement/digging) -->
+    <!-- Game Screen -->
     <div id="gameScreen" class="screen">
       <div class="game-header">
         <div class="timer-box">
@@ -340,7 +429,7 @@
       </div>
 
       <div class="turn-area">
-        <span class="turn-text" id="turnIndicator">✨ your turn</span>
+        <span class="turn-text" id="turnIndicator">✨ Place your hearts</span>
         <div class="hot-meter" id="hotMeter">
           <span id="hotLabel">❄️ Cold</span>
           <div class="hot-indicator cold" id="hotLight"></div>
@@ -363,7 +452,7 @@
         </div>
       </div>
 
-      <!-- Ready Button (placement only) -->
+      <!-- Ready Button -->
       <button id="readyBtn" class="ready-btn">✅ I'm ready</button>
     </div>
 
@@ -412,6 +501,7 @@
       const sendChat = document.getElementById('sendChat');
       const winnerMessage = document.getElementById('winnerMessage');
       const playAgainBtn = document.getElementById('playAgainBtn');
+      const toast = document.getElementById('toast');
 
       // Game state
       let currentPhase = 'waiting';
@@ -420,11 +510,21 @@
       let myLoves = []; // indices where i placed hearts
       let boardState = Array(50).fill(null); // null, 'heart', 'empty', 'found'
       let scores = { rizwan: 0, anha: 0 };
+      let otherPlayerReady = false;
+
+      // Show toast message
+      function showToast(msg, duration = 3000) {
+        toast.textContent = msg;
+        toast.style.display = 'block';
+        setTimeout(() => {
+          toast.style.display = 'none';
+        }, duration);
+      }
 
       // Send join event
       socket.emit('joinGame', { player, room });
 
-      // Render 5x10 grid
+      // Render grid
       function renderGrid() {
         gridEl.innerHTML = '';
         for (let i = 0; i < 50; i++) {
@@ -460,7 +560,7 @@
       function onCellClick(e) {
         const index = e.currentTarget.dataset.index;
         if (currentPhase === 'placement') {
-          if (!myTurn) return;
+          // No turn restriction – both can place simultaneously
           if (lovesToPlace <= 0 && !myLoves.includes(index)) return;
           if (myLoves.includes(index)) {
             // remove
@@ -502,34 +602,53 @@
 
       // Ready button
       readyBtn.addEventListener('click', () => {
-        if (currentPhase === 'placement' && myTurn) {
-          if (myLoves.length === 10) {
-            const loves = myLoves.map(idx => [Math.floor(idx/5), idx%5]);
-            socket.emit('placeLoves', { room, loves });
-            readyBtn.disabled = true;
-            readyBtn.innerText = '✅ Ready!';
-          } else {
-            alert(`You need to place exactly 10 hearts! (${myLoves.length} placed)`);
+        if (currentPhase !== 'placement') return;
+        if (myLoves.length !== 10) {
+          alert(`You need to place exactly 10 hearts! (${myLoves.length} placed)`);
+          return;
+        }
+        // Disable button and send loves
+        readyBtn.disabled = true;
+        readyBtn.innerText = '⏳ Waiting for other player...';
+        const loves = myLoves.map(idx => [Math.floor(idx/5), idx%5]);
+        socket.emit('placeLoves', { room, loves });
+      });
+
+      // Socket events
+      socket.on('gameState', ({ currentPhase: phase, turn, scores: newScores, ready }) => {
+        currentPhase = phase || 'placement';
+        myTurn = (turn === player);
+        if (newScores) scores = newScores;
+        if (ready) {
+          otherPlayerReady = ready[player === 'rizwan' ? 'anha' : 'rizwan'] || false;
+          if (otherPlayerReady) {
+            showToast(`${player === 'rizwan' ? 'Anha' : 'Rizwan'} is ready!`);
           }
         }
       });
 
-      // Socket events
-      socket.on('playerJoined', ({ players, currentPhase: phase, turn, scores: newScores }) => {
+      socket.on('playerList', (players) => {
         if (players.length === 2) {
           waitingScreen.classList.remove('active');
           gameScreen.classList.add('active');
           renderGrid();
-          currentPhase = phase || 'placement';
-          myTurn = (turn === player);
-          if (currentPhase === 'placement') {
-            turnIndicator.innerText = myTurn ? '✨ your turn to place' : `✨ ${turn}'s turn`;
-            lovesLeftEl.textContent = '❤️ 10 left';
-            readyBtn.disabled = false;
-            readyBtn.style.display = 'block';
-          }
-          if (newScores) scores = newScores;
-          updateScore();
+          currentPhase = 'placement';
+          turnIndicator.innerText = '✨ Place your 10 hearts';
+          lovesLeftEl.textContent = '❤️ 10 left';
+          readyBtn.disabled = false;
+          readyBtn.innerText = '✅ I\'m ready';
+        }
+      });
+
+      socket.on('placementStart', () => {
+        // Already handled by playerList
+      });
+
+      socket.on('playerReady', ({ player: readyPlayer }) => {
+        const name = readyPlayer === 'rizwan' ? 'Rizwan' : 'Anha';
+        showToast(`${name} is ready!`);
+        if (readyPlayer !== player) {
+          otherPlayerReady = true;
         }
       });
 
@@ -554,7 +673,7 @@
           else if (myScore < opponentScore) winnerMessage.innerText = `${player === 'rizwan' ? 'Anha' : 'Rizwan'} wins! 💔`;
           else winnerMessage.innerText = `It's a tie! 🎀`;
 
-          // confetti
+          // Confetti
           for (let i=0; i<10; i++) {
             setTimeout(() => {
               let conf = document.createElement('div');
@@ -619,11 +738,10 @@
       playAgainBtn.addEventListener('click', () => {
         resultScreen.classList.remove('active');
         waitingScreen.classList.add('active');
-        // Reload to restart
-        window.location.reload();
+        window.location.reload(); // simple reset
       });
 
-      // CSS for confetti
+      // Confetti style
       const style = document.createElement('style');
       style.innerHTML = `@keyframes fall { 0% { transform: translateY(0) rotate(0); opacity:1; } 100% { transform: translateY(100vh) rotate(360deg); opacity:0; } }`;
       document.head.appendChild(style);
