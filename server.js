@@ -6,8 +6,15 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static('public')); // if you put index.html in /public, else adjust
+// ✅ FIX: Serve index.html from the root directory
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+});
 
+// Optional: if you have a public folder with assets (CSS, JS, images), uncomment the next line
+// app.use(express.static('public'));
+
+// In‑memory game rooms
 const rooms = {};
 
 io.on('connection', (socket) => {
@@ -17,9 +24,9 @@ io.on('connection', (socket) => {
     const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     rooms[roomCode] = {
       players: [socket.id],
-      playerNames: { [socket.id]: '' }, // will be set later
+      playerNames: { [socket.id]: '' },
       placements: {},
-      dugCells: {}, // { opponentId: Set(cellKeys) }
+      dugCells: {},
       currentPhase: 'placement',
       turnIndex: 0,
       digsLeft: 20,
@@ -41,10 +48,8 @@ io.on('connection', (socket) => {
     socket.join(roomCode);
     socket.emit('roomJoined', roomCode);
 
-    // Assign names to both players (first player may not have set name yet)
     if (room.players.length === 2) {
       const [p1, p2] = room.players;
-      // Default names if not set
       if (!room.playerNames[p1]) room.playerNames[p1] = 'Rizwan';
       if (!room.playerNames[p2]) room.playerNames[p2] = 'Anha';
       io.to(roomCode).emit('gameStart', {
@@ -90,7 +95,6 @@ io.on('connection', (socket) => {
     const opponentId = room.players.find(id => id !== socket.id);
     const cellKey = `${row},${col}`;
 
-    // Prevent re-digging
     if (room.dugCells[opponentId].has(cellKey)) {
       socket.emit('digIgnored', 'Already dug here!');
       return;
@@ -104,24 +108,21 @@ io.on('connection', (socket) => {
     room.digsLeft--;
     if (found) {
       room.scores[socket.id] = (room.scores[socket.id] || 0) + 1;
-      // Remove that love so it can't be found again
       opponentLoves.splice(foundIndex, 1);
     }
 
-    // Calculate hotness based on distance to nearest remaining love
-    let hotness = 'cold'; // default
+    let hotness = 'cold';
     if (opponentLoves.length > 0) {
       const distances = opponentLoves.map(([r, c]) => Math.abs(r - row) + Math.abs(c - col));
       const minDist = Math.min(...distances);
-      if (minDist === 0) hotness = 'found'; // should not happen here
+      if (minDist === 0) hotness = 'found';
       else if (minDist <= 1) hotness = 'hot';
       else if (minDist <= 2) hotness = 'warm';
       else hotness = 'cold';
     } else {
-      hotness = 'none'; // no loves left
+      hotness = 'none';
     }
 
-    // Emit result to all
     io.to(roomCode).emit('digResult', {
       player: socket.id,
       row, col,
@@ -131,7 +132,6 @@ io.on('connection', (socket) => {
       scores: room.scores,
     });
 
-    // Switch turn
     room.turnIndex = room.turnIndex === 0 ? 1 : 0;
     io.to(roomCode).emit('turnChange', room.players[room.turnIndex]);
 
